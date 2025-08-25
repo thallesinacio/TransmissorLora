@@ -36,7 +36,8 @@ pico_sdk_init()
 # Add executable. Default name is the project name, version 0.1
 
 add_executable(TRANSMISSOR_LORA TRANSMISSOR_LORA.c 
-    lib/lora_sx1276.c)
+    lib/lora_sx1276.c
+    lib/aht20.c)
 
 pico_set_program_name(TRANSMISSOR_LORA "TRANSMISSOR_LORA")
 pico_set_program_version(TRANSMISSOR_LORA "0.1")

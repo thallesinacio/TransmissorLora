@@ -4,6 +4,7 @@
 #include "hardware/i2c.h"
 #include "lib/lora_sx1276.h"
 #include "pico/binary_info.h"
+#include "lib/aht20.h"
 // #include "dht11.h"
 
 // Adjust to match lora_sx1276.h pin macros if needed.
@@ -13,6 +14,12 @@
 #define I2C_SDA 0                   // 0 ou 2
 #define I2C_SCL 1                  // 1 ou 3
 
+
+// Estrutura para armazenar dados do sensor AHT20
+AHT20_Data data;
+
+volatile float g_temp_aht = 0.0f;
+volatile float g_humidity_aht = 0.0f;
  
  // O endereço padrao deste IMU é o 0x68
  static int addr = 0x68;
@@ -93,16 +100,29 @@ int main() {
      mpu6050_reset();
  
      int16_t acceleration[3], gyro[3], temp;
+     char str_temp_aht[10], str_humidity_aht[10];
 
     while (1) {
 
         // Captura de dados do sensor
         mpu6050_read_raw(acceleration, gyro, &temp);
 
+        bool aht_ok = aht20_read(I2C_PORT, &data);
+
+        if (aht_ok) {
+            g_temp_aht = data.temperature;
+            g_humidity_aht = data.humidity;
+        } else {
+            g_temp_aht = 0.0; g_humidity_aht = 0.0;
+        }
+
+        sprintf(str_temp_aht, "%.1fC", g_temp_aht);
+        sprintf(str_humidity_aht, "%.1f%%", g_humidity_aht);
 
         // Build payload
         char payload[80];
-        int len = snprintf(payload, sizeof(payload), "Ax: %d, Ay: %d, Az: %d\nGx: %d, Gy: %d, Gz: %d\n", acceleration[0], acceleration[1], acceleration[2], gyro[0], gyro[1], gyro[2]);
+        int len = snprintf(payload, sizeof(payload), "Ax: %d, Ay: %d, Az: %d\nGx: %d, Gy: %d, Gz: %d\nTemperatura: %s, Umidade: %s", 
+                        acceleration[0], acceleration[1], acceleration[2], gyro[0], gyro[1], gyro[2], str_temp_aht, str_humidity_aht);
         if (len <= 0) {
             printf("Erro format payload\n");
             sleep_ms(5000);
