@@ -121,7 +121,7 @@ int main() {
 
         // Build payload
         char payload[80];
-        int len = snprintf(payload, sizeof(payload), "Ax: %d, Ay: %d, Az: %d\nGx: %d, Gy: %d, Gz: %d\nTemperatura: %s, Umidade: %s", 
+        int len = snprintf(payload, sizeof(payload), "Ax: %d, Ay: %d, Az: %d\nGx: %d, Gy: %d, Gz: %d\nTemperatura: %s, Umidade: %s\n", 
                         acceleration[0], acceleration[1], acceleration[2], gyro[0], gyro[1], gyro[2], str_temp_aht, str_humidity_aht);
         if (len <= 0) {
             printf("Erro format payload\n");
