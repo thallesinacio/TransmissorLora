@@ -5,6 +5,7 @@
 #include "lib/lora_sx1276.h"
 #include "pico/binary_info.h"
 #include "lib/aht20.h"
+#include "lib/bh1750_light_sensor.h"
 // #include "dht11.h"
 
 // Adjust to match lora_sx1276.h pin macros if needed.
@@ -13,10 +14,11 @@
 #define I2C_PORT i2c0               // i2c0 pinos 0 e 1, i2c1 pinos 2 e 3
 #define I2C_SDA 0                   // 0 ou 2
 #define I2C_SCL 1                  // 1 ou 3
-
+#define BH1750_I2C_ADDR 0x23    // Sensor de luz na J2
 
 // Estrutura para armazenar dados do sensor AHT20
 AHT20_Data data;
+
 
 volatile float g_temp_aht = 0.0f;
 volatile float g_humidity_aht = 0.0f;
@@ -101,6 +103,7 @@ int main() {
  
      int16_t acceleration[3], gyro[3], temp;
      char str_temp_aht[10], str_humidity_aht[10];
+     uint16_t lux;
 
     while (1) {
 
@@ -108,6 +111,8 @@ int main() {
         mpu6050_read_raw(acceleration, gyro, &temp);
 
         bool aht_ok = aht20_read(I2C_PORT, &data);
+
+        lux = bh1750_read_measurement(I2C_PORT);
 
         if (aht_ok) {
             g_temp_aht = data.temperature;
@@ -121,8 +126,8 @@ int main() {
 
         // Build payload
         char payload[80];
-        int len = snprintf(payload, sizeof(payload), "Ax: %d, Ay: %d, Az: %d\nGx: %d, Gy: %d, Gz: %d\nTemperatura: %s, Umidade: %s\n", 
-                        acceleration[0], acceleration[1], acceleration[2], gyro[0], gyro[1], gyro[2], str_temp_aht, str_humidity_aht);
+        int len = snprintf(payload, sizeof(payload), "Lux: %d, Temperatura: %s, Umidade: %s\n", 
+                           lux, str_temp_aht, str_humidity_aht);
         if (len <= 0) {
             printf("Erro format payload\n");
             sleep_ms(5000);

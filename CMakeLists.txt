@@ -37,7 +37,8 @@ pico_sdk_init()
 
 add_executable(TRANSMISSOR_LORA TRANSMISSOR_LORA.c 
     lib/lora_sx1276.c
-    lib/aht20.c)
+    lib/aht20.c
+    lib/bh1750_light_sensor.c)
 
 pico_set_program_name(TRANSMISSOR_LORA "TRANSMISSOR_LORA")
 pico_set_program_version(TRANSMISSOR_LORA "0.1")
